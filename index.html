@@ -750,21 +750,13 @@
                 <span class="tempo-value" id="tempoValue">120 BPM</span>
             </div>
             <div class="transport-controls">
-                <button class="btn" id="downloadTxtBtn">
+                <button class="btn" id="exportBtn">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
-                    <span>TXT</span>
-                </button>
-                <button class="btn" id="downloadMidiBtn">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    <span>MIDI</span>
+                    <span>Export</span>
                 </button>
                 <button class="btn" id="uploadBtn">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -844,91 +836,35 @@
         </div>
     </div>
 
-    <script>
-        // Translations
-        const TRANSLATIONS = {
-            "en-US": {
-                "logoText": "LIL BEAT GENERATOR",
-                "subtitleText": "ARE YOU A PRODUCER STUMPED ON IDEAS? GET STARTED HERE.",
-                "beatInputPlaceholder": "Describe your beat (e.g., 'minimal techno', 'trap drums', 'vintage funk')",
-                "generateButton": "AI Generate",
-                "generatingButton": "Generating...",
-                "ideaLabel": "Try these:",
-                "idea808": "808 Cowbell",
-                "ideaGlitch": "Glitch",
-                "ideaJazz": "Jazz Fusion",
-                "ideaAfrobeat": "Afrobeat",
-                "ideaLoFi": "Lo-Fi",
-                "ideaStadium": "Stadium Rock",
-                "ideaAmbient": "Ambient",
-                "playButton": "Play",
-                "pauseButton": "Pause",
-                "stopButton": "Stop",
-                "clearButton": "Clear",
-                "tempoLabel": "Tempo",
-                "kickLabel": "Kick",
-                "snareLabel": "Snare",
-                "hihatLabel": "HiHat",
-                "openhatLabel": "OpenHat",
-                "clapLabel": "Clap",
-                "presetTechno": "Techno",
-                "presetHouse": "House",
-                "presetTrap": "Trap",
-                "presetBreakbeat": "Breakbeat",
-                "presetMinimal": "Minimal",
-                "errorDescribeBeat": "Please describe the beat you want",
-                "errorGenerationFailed": "Generation failed. Try again.",
-                "successGeneratedBeat": "Generated {preset} beat",
-                "successLoadedPreset": "Loaded {preset} preset"
-            },
-            /* LOCALE_PLACEHOLDER_START */
-            "es-ES": {
-                "logoText": "MÁQUINA DE RITMO",
-                "subtitleText": "IMPULSADO POR IA • MODELO 002",
-                "beatInputPlaceholder": "Describe tu ritmo (ej., 'techno minimal', 'batería trap', 'funk vintage')",
-                "generateButton": "Generar",
-                "generatingButton": "Generando...",
-                "ideaLabel": "Prueba estos:",
-                "idea808": "808 Cowbell",
-                "ideaGlitch": "Glitch",
-                "ideaJazz": "Jazz Fusion",
-                "ideaAfrobeat": "Afrobeat",
-                "ideaLoFi": "Lo-Fi",
-                "ideaStadium": "Rock Estadio",
-                "ideaAmbient": "Ambiental",
-                "playButton": "Reproducir",
-                "pauseButton": "Pausar",
-                "stopButton": "Parar",
-                "clearButton": "Limpiar",
-                "tempoLabel": "Tempo",
-                "kickLabel": "Bombo",
-                "snareLabel": "Caja",
-                "hihatLabel": "Charles",
-                "openhatLabel": "Charles Abierto",
-                "clapLabel": "Palmada",
-                "presetTechno": "Techno",
-                "presetHouse": "House",
-                "presetTrap": "Trap",
-                "presetBreakbeat": "Breakbeat",
-                "presetMinimal": "Minimal",
-                "errorDescribeBeat": "Por favor describe el ritmo que quieres",
-                "errorGenerationFailed": "Generación falló. Inténtalo de nuevo.",
-                "successGeneratedBeat": "Ritmo {preset} generado",
-                "successLoadedPreset": "Preset {preset} cargado"
-            }
-            /* LOCALE_PLACEHOLDER_END */
-        };
+    <div class="loading-overlay" id="exportModal">
+        <div class="loading-content" style="max-width: 500px;">
+            <div style="margin-bottom: 24px;">
+                <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 500;">Export Beat</h3>
+                <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+                    TXT files can be re-uploaded to this site to continue editing. MIDI files are for opening in your DAW (Ableton, FL Studio, etc.)
+                </p>
+            </div>
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; margin-bottom: 8px; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary);">
+                    Filename
+                </label>
+                <input
+                    type="text"
+                    class="input-field"
+                    id="exportFilename"
+                    value="mybeat"
+                    style="width: 100%;"
+                />
+            </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                <button class="btn primary" id="exportTxtBtn" style="flex: 1;">Export as TXT</button>
+                <button class="btn primary" id="exportMidiBtn" style="flex: 1;">Export as MIDI</button>
+            </div>
+            <button class="btn" id="cancelExportBtn" style="width: 100%;">Cancel</button>
+        </div>
+    </div>
 
-        const appLocale = '{{APP_LOCALE}}';
-        const browserLocale = navigator.languages?.[0] || navigator.language || 'en-US';
-        const findMatchingLocale = (locale) => {
-            if (TRANSLATIONS[locale]) return locale;
-            const lang = locale.split('-')[0];
-            const match = Object.keys(TRANSLATIONS).find(key => key.startsWith(lang + '-'));
-            return match || 'en-US';
-        };
-        const locale = (appLocale !== '{{APP_LOCALE}}') ? findMatchingLocale(appLocale) : findMatchingLocale(browserLocale);
-        const t = (key) => TRANSLATIONS[locale]?.[key] || TRANSLATIONS['en-US'][key] || key;
+    <script>
 
         // Configuration
         const STEPS = 16;
@@ -943,7 +879,7 @@
         let isDragging = false;
         let dragMode = null; // 'add' or 'remove'
         let dragType = null; // 'drum' or 'piano'
-        
+
         // Preset patterns
         const presets = {
             techno: {
@@ -990,41 +926,6 @@
         let intervalId = null;
         let pattern = {};
 
-        // Initialize UI text with translations
-        function initializeUI() {
-            document.querySelector('.logo').textContent = t('logoText');
-            document.querySelector('.subtitle').textContent = t('subtitleText');
-            document.getElementById('beatInput').placeholder = t('beatInputPlaceholder');
-            document.getElementById('generateBtn').textContent = t('generateButton');
-            document.querySelector('.idea-label').textContent = t('ideaLabel');
-            
-            // Update idea buttons
-            const ideaButtons = document.querySelectorAll('.idea-btn');
-            const ideaKeys = ['idea808', 'ideaGlitch', 'ideaJazz', 'ideaAfrobeat', 'ideaLoFi', 'ideaStadium', 'ideaAmbient'];
-            ideaButtons.forEach((btn, i) => {
-                if (ideaKeys[i]) btn.textContent = t(ideaKeys[i]);
-            });
-            
-            // Update transport controls
-            document.querySelector('#playBtn span').textContent = t('playButton');
-            document.querySelector('#stopBtn span').textContent = t('stopButton');
-            document.querySelector('#clearBtn span').textContent = t('clearButton');
-            document.querySelector('.tempo-label').textContent = t('tempoLabel');
-            
-            // Update track labels
-            const trackLabels = document.querySelectorAll('.track-label');
-            const trackKeys = ['kickLabel', 'snareLabel', 'hihatLabel', 'openhatLabel', 'clapLabel'];
-            trackLabels.forEach((label, i) => {
-                if (trackKeys[i]) label.textContent = t(trackKeys[i]);
-            });
-            
-            // Update preset buttons
-            const presetButtons = document.querySelectorAll('.preset-btn');
-            const presetKeys = ['presetTechno', 'presetHouse', 'presetTrap', 'presetBreakbeat', 'presetMinimal'];
-            presetButtons.forEach((btn, i) => {
-                if (presetKeys[i]) btn.textContent = t(presetKeys[i]);
-            });
-        }
 
         // Initialize empty pattern
         instruments.forEach(inst => {
@@ -1426,7 +1327,7 @@
                         <rect x="6" y="4" width="4" height="16"></rect>
                         <rect x="14" y="4" width="4" height="16"></rect>
                     </svg>
-                    <span>${t('pauseButton')}</span>
+                    <span>Pause</span>
                 `;
                 
                 advanceSequencer();
@@ -1446,7 +1347,7 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                 </svg>
-                <span>${t('playButton')}</span>
+                <span>Play</span>
             `;
         }
 
@@ -1503,15 +1404,15 @@
         async function generateBeat() {
             const input = document.getElementById('beatInput').value;
             if (!input.trim()) {
-                showStatus(t('errorDescribeBeat'), 'error');
+                showStatus('Please describe the beat you want', 'error');
                 return;
             }
-            
+
             const btn = document.getElementById('generateBtn');
             const loadingOverlay = document.getElementById('loadingOverlay');
-            
+
             btn.disabled = true;
-            btn.textContent = t('generatingButton');
+            btn.textContent = 'Generating...';
             loadingOverlay.classList.add('show');
             
             try {
@@ -1533,17 +1434,17 @@
                 }
 
                 const data = await response.json();
-                
+
                 // Process drum pattern
                 const preset = data.drumPattern;
                 let newPattern = {};
-                
+
                 if (presets[preset]) {
                     newPattern = JSON.parse(JSON.stringify(presets[preset]));
                 } else {
                     newPattern = JSON.parse(JSON.stringify(presets.techno));
                 }
-                
+
                 // Process piano pattern
                 let pianoText = data.pianoPattern;
                 pianoText = pianoText.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -1585,21 +1486,31 @@
                 
                 updatePattern();
                 updatePianoPattern();
-                
-                showStatus(t('successGeneratedBeat').replace('{preset}', preset), 'success');
-                
+
+                showStatus(`Generated ${preset} beat`, 'success');
+
             } catch (error) {
                 console.error('Generation error:', error);
-                showStatus(t('errorGenerationFailed'), 'error');
+                showStatus('Generation failed. Try again.', 'error');
             } finally {
                 loadingOverlay.classList.remove('show');
                 btn.disabled = false;
-                btn.textContent = t('generateButton');
+                btn.textContent = 'AI Generate';
             }
         }
 
         // Export/Import functions
-        function downloadAsTxt() {
+        function showExportModal() {
+            document.getElementById('exportModal').classList.add('show');
+            document.getElementById('exportFilename').focus();
+            document.getElementById('exportFilename').select();
+        }
+
+        function hideExportModal() {
+            document.getElementById('exportModal').classList.remove('show');
+        }
+
+        function downloadAsTxt(filename = 'mybeat') {
             const tempo = parseInt(document.getElementById('tempoSlider').value);
             const data = {
                 version: '1.0',
@@ -1614,16 +1525,17 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `beat-${Date.now()}.txt`;
+            a.download = `${filename}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
+            hideExportModal();
             showStatus('Beat exported as TXT', 'success');
         }
 
-        function downloadAsMidi() {
+        function downloadAsMidi(filename = 'mybeat') {
             const tempo = parseInt(document.getElementById('tempoSlider').value);
 
             // Create MIDI file
@@ -1632,12 +1544,13 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `beat-${Date.now()}.mid`;
+            a.download = `${filename}.mid`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
+            hideExportModal();
             showStatus('Beat exported as MIDI', 'success');
         }
 
@@ -1918,8 +1831,16 @@
         document.getElementById('clearDrumsBtn').addEventListener('click', clearDrums);
         document.getElementById('clearPianoBtn').addEventListener('click', clearPiano);
         document.getElementById('generateBtn').addEventListener('click', generateBeat);
-        document.getElementById('downloadTxtBtn').addEventListener('click', downloadAsTxt);
-        document.getElementById('downloadMidiBtn').addEventListener('click', downloadAsMidi);
+        document.getElementById('exportBtn').addEventListener('click', showExportModal);
+        document.getElementById('exportTxtBtn').addEventListener('click', () => {
+            const filename = document.getElementById('exportFilename').value.trim() || 'mybeat';
+            downloadAsTxt(filename);
+        });
+        document.getElementById('exportMidiBtn').addEventListener('click', () => {
+            const filename = document.getElementById('exportFilename').value.trim() || 'mybeat';
+            downloadAsMidi(filename);
+        });
+        document.getElementById('cancelExportBtn').addEventListener('click', hideExportModal);
         document.getElementById('uploadBtn').addEventListener('click', uploadFromFile);
         document.getElementById('fileInput').addEventListener('change', handleFileUpload);
         
@@ -1944,18 +1865,6 @@
             }
         });
         
-        // Preset buttons
-        document.querySelectorAll('.preset-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const preset = btn.dataset.preset;
-                if (presets[preset]) {
-                    pattern = JSON.parse(JSON.stringify(presets[preset]));
-                    updatePattern();
-                    showStatus(t('successLoadedPreset').replace('{preset}', preset), 'success');
-                }
-            });
-        });
-
         // Idea buttons
         document.querySelectorAll('.idea-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1979,7 +1888,6 @@
         });
 
         // Initialize
-        initializeUI();
         createSequencer();
         createPianoRoll();
     </script>

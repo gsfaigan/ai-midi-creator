@@ -27,17 +27,12 @@ Access at http://localhost:5173
 ## Features
 
 - 16-step drum sequencer with 5 drum sounds
-- Piano roll with 12 notes per octave
-- AI-powered generation using Google Gemini
-- Tempo control (60-200 BPM)
-- Multi-language support
+- Piano roll with multiple octaves
+- AI-powered generation
+- Tempo control (60-180 BPM)
 - Play, pause, stop, clear, and random pattern generation
+- Export to txt (for opening in the site later) and export to MIDI (for opening in a DAW)
 
 ## Security
 
-Never commit your `.env` file. If you accidentally commit your API key, revoke it immediately at the provider dashboard and remove it from git history using:
-
-```bash
-git filter-branch --force --index-filter "git rm --cached --ignore-unmatch .env" --prune-empty --tag-name-filter cat -- --all
-git push origin --force --all
-```
+Never commit your `.env` file.
