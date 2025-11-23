@@ -174,20 +174,19 @@
         }
 
         .logo {
-            font-size: 20px;
+            font-size: 28px;
             font-weight: 700;
             letter-spacing: 0.1em;
-            color: var(--accent-primary);
+            color: var(--text-primary);
             text-transform: uppercase;
-            text-shadow: 0 0 10px var(--melody-glow);
             font-family: 'Courier Prime', monospace;
         }
 
         .subtitle {
-            font-size: 9px;
+            font-size: 11px;
             font-weight: 400;
-            letter-spacing: 0.15em;
-            color: var(--text-dim);
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
             text-transform: uppercase;
         }
 
@@ -225,13 +224,19 @@
 
         .ai-input {
             display: flex;
-            gap: var(--space-sm);
+            flex-direction: column;
+            gap: var(--space-md);
             margin-bottom: var(--space-lg);
             padding: var(--space-lg);
             background: var(--bg-secondary);
             border: 1px solid var(--border-thin);
             border-radius: var(--radius-md);
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .ai-input-row {
+            display: flex;
+            gap: var(--space-sm);
         }
 
         .input-field {
@@ -427,9 +432,13 @@
             border: 2px solid var(--border-thin);
             border-radius: var(--radius-md);
             padding: var(--space-lg);
+            margin-top: var(--space-lg);
             margin-bottom: var(--space-lg);
             box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.03);
             position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
         }
 
         .sequencer::before {
@@ -558,6 +567,9 @@
             margin-top: var(--space-lg);
             box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.03);
             position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
         }
 
         .piano-roll-container::before {
@@ -696,13 +708,72 @@
         }
 
         .piano-cell.active {
-            background: var(--melody-color);
             box-shadow: 0 0 10px var(--melody-glow), inset 0 0 8px var(--melody-glow);
         }
 
         .piano-cell.active::before {
-            background: var(--melody-color);
             opacity: 0.9;
+        }
+
+        /* Gradient from dark green (C/bottom) to light green (B/top) */
+        .piano-cell:nth-child(n+1):nth-child(-n+16).active,
+        .piano-cell:nth-child(n+1):nth-child(-n+16).active::before {
+            background: #008055; /* Darkest - C */
+        }
+
+        .piano-cell:nth-child(n+17):nth-child(-n+32).active,
+        .piano-cell:nth-child(n+17):nth-child(-n+32).active::before {
+            background: #00995f;
+        }
+
+        .piano-cell:nth-child(n+33):nth-child(-n+48).active,
+        .piano-cell:nth-child(n+33):nth-child(-n+48).active::before {
+            background: #00b36a;
+        }
+
+        .piano-cell:nth-child(n+49):nth-child(-n+64).active,
+        .piano-cell:nth-child(n+49):nth-child(-n+64).active::before {
+            background: #00cc75;
+        }
+
+        .piano-cell:nth-child(n+65):nth-child(-n+80).active,
+        .piano-cell:nth-child(n+65):nth-child(-n+80).active::before {
+            background: #00e680;
+        }
+
+        .piano-cell:nth-child(n+81):nth-child(-n+96).active,
+        .piano-cell:nth-child(n+81):nth-child(-n+96).active::before {
+            background: #00ff8b;
+        }
+
+        .piano-cell:nth-child(n+97):nth-child(-n+112).active,
+        .piano-cell:nth-child(n+97):nth-child(-n+112).active::before {
+            background: #1aff99;
+        }
+
+        .piano-cell:nth-child(n+113):nth-child(-n+128).active,
+        .piano-cell:nth-child(n+113):nth-child(-n+128).active::before {
+            background: #33ffa6;
+        }
+
+        .piano-cell:nth-child(n+129):nth-child(-n+144).active,
+        .piano-cell:nth-child(n+129):nth-child(-n+144).active::before {
+            background: #4dffb3;
+        }
+
+        .piano-cell:nth-child(n+145):nth-child(-n+160).active,
+        .piano-cell:nth-child(n+145):nth-child(-n+160).active::before {
+            background: #66ffc0;
+        }
+
+        .piano-cell:nth-child(n+161):nth-child(-n+176).active,
+        .piano-cell:nth-child(n+161):nth-child(-n+176).active::before {
+            background: #80ffcc;
+        }
+
+        .piano-cell:nth-child(n+177):nth-child(-n+192).active,
+        .piano-cell:nth-child(n+177):nth-child(-n+192).active::before {
+            background: #99ffd9; /* Lightest - B */
         }
 
         .piano-cell:nth-child(4n+1) {
@@ -724,7 +795,6 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 16px;
             flex-wrap: wrap;
         }
 
@@ -899,25 +969,27 @@
         </div>
 
         <div class="ai-input">
-            <input 
-                type="text" 
-                class="input-field" 
-                id="beatInput" 
-                placeholder="describe your beat"
-                autocomplete="off"
-            />
-            <button class="btn primary" id="generateBtn">Generate</button>
-        </div>
+            <div class="ai-input-row">
+                <input
+                    type="text"
+                    class="input-field"
+                    id="beatInput"
+                    placeholder="describe your beat"
+                    autocomplete="off"
+                />
+                <button class="btn primary" id="generateBtn">Generate</button>
+            </div>
 
-        <div class="idea-buttons">
-            <span class="idea-label">Try these:</span>
-            <button class="btn idea-btn" data-idea="breakbeat jungle rhythm">Breakbeat</button>
-            <button class="btn idea-btn" data-idea="synthwave retro drums">Synthwave</button>
-            <button class="btn idea-btn" data-idea="boom bap hip hop">Boom Bap</button>
-            <button class="btn idea-btn" data-idea="uk garage shuffle">UK Garage</button>
-            <button class="btn idea-btn" data-idea="drill aggressive beat">Drill</button>
-            <button class="btn idea-btn" data-idea="drum and bass fast">D&B</button>
-            <button class="btn idea-btn" data-idea="vaporwave dreamy">Vaporwave</button>
+            <div class="idea-buttons">
+                <span class="idea-label">Examples:</span>
+                <button class="btn idea-btn" data-idea="breakbeat jungle rhythm">Breakbeat</button>
+                <button class="btn idea-btn" data-idea="synthwave retro drums">Synthwave</button>
+                <button class="btn idea-btn" data-idea="boom bap hip hop">Boom Bap</button>
+                <button class="btn idea-btn" data-idea="uk garage shuffle">UK Garage</button>
+                <button class="btn idea-btn" data-idea="drill aggressive beat">Drill</button>
+                <button class="btn idea-btn" data-idea="drum and bass fast">D&B</button>
+                <button class="btn idea-btn" data-idea="vaporwave dreamy">Vaporwave</button>
+            </div>
         </div>
 
         <div class="divider"></div>
@@ -971,6 +1043,32 @@
             </div>
         </div>
 
+        <div class="piano-roll-container">
+            <div class="piano-roll-header">
+                <div class="piano-roll-title">Piano Roll</div>
+                <div class="piano-roll-controls">
+                    <div class="piano-octave-control">
+                        <button class="btn octave-btn" id="octaveDown">-</button>
+                        <span id="octaveDisplay">Octave 4</span>
+                        <button class="btn octave-btn" id="octaveUp">+</button>
+                    </div>
+                    <button class="btn" id="clearPianoBtn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
+                            <line x1="18" y1="9" x2="12" y2="15"></line>
+                            <line x1="12" y1="9" x2="18" y2="15"></line>
+                        </svg>
+                        <span>Clear Piano</span>
+                    </button>
+                </div>
+            </div>
+            <div class="piano-roll">
+                <div class="piano-keys" id="pianoKeys"></div>
+                <div class="piano-grid" id="pianoGrid"></div>
+                <div class="piano-playhead" id="pianoPlayhead"></div>
+            </div>
+        </div>
+
         <div class="sequencer" id="sequencer">
             <div class="sequencer-header">
                 <div class="sequencer-title">Drum Sequencer</div>
@@ -999,32 +1097,6 @@
                 <div class="track-label">Clap</div>
             </div>
         </div>
-
-        <div class="piano-roll-container">
-            <div class="piano-roll-header">
-                <div class="piano-roll-title">Piano Roll</div>
-                <div class="piano-roll-controls">
-                    <div class="piano-octave-control">
-                        <button class="btn octave-btn" id="octaveDown">-</button>
-                        <span id="octaveDisplay">Octave 4</span>
-                        <button class="btn octave-btn" id="octaveUp">+</button>
-                    </div>
-                    <button class="btn" id="clearPianoBtn">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
-                            <line x1="18" y1="9" x2="12" y2="15"></line>
-                            <line x1="12" y1="9" x2="18" y2="15"></line>
-                        </svg>
-                        <span>Clear Piano</span>
-                    </button>
-                </div>
-            </div>
-            <div class="piano-roll">
-                <div class="piano-keys" id="pianoKeys"></div>
-                <div class="piano-grid" id="pianoGrid"></div>
-                <div class="piano-playhead" id="pianoPlayhead"></div>
-            </div>
-        </div>
     </div>
 
     <div class="status-message" id="statusMessage"></div>
@@ -1042,7 +1114,7 @@
             <div style="margin-bottom: 24px;">
                 <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 500;">Export Beat</h3>
                 <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
-                    TXT files can be re-uploaded to this site to continue editing. MIDI files are for opening in your DAW (Ableton, FL Studio, etc.)
+                    TXT files can be re-uploaded to this site to continue editing. MIDI files are for opening in your DAW.
                 </p>
             </div>
             <div style="margin-bottom: 24px;">
@@ -2039,6 +2111,15 @@
             downloadAsMidi(filename);
         });
         document.getElementById('cancelExportBtn').addEventListener('click', hideExportModal);
+
+        // Clear filename input on first focus
+        const filenameInput = document.getElementById('exportFilename');
+        filenameInput.addEventListener('focus', function clearOnce() {
+            if (this.value === 'mybeat') {
+                this.value = '';
+            }
+        });
+
         document.getElementById('uploadBtn').addEventListener('click', uploadFromFile);
         document.getElementById('fileInput').addEventListener('change', handleFileUpload);
         
