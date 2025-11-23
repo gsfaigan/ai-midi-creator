@@ -5,27 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rhythm Machine</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Courier+Prime:wght@400;700&display=swap');
+
+        @keyframes noise {
+            0%, 100% { background-position: 0 0; }
+            10% { background-position: -5% -10%; }
+            20% { background-position: -15% 5%; }
+            30% { background-position: 7% -25%; }
+            40% { background-position: 20% 25%; }
+            50% { background-position: -25% 10%; }
+            60% { background-position: 15% 5%; }
+            70% { background-position: 0% 15%; }
+            80% { background-position: 25% 35%; }
+            90% { background-position: -10% 10%; }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px currentColor, 0 0 10px currentColor; }
+            50% { box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         :root {
-            --bg-primary: #FFFFFF;
-            --bg-secondary: #F9FAFB;
-            --bg-tertiary: #F3F4F6;
-            --text-primary: #101827;
-            --text-secondary: #6B7280;
-            --accent: #F97315;
-            --accent-hover: #EA580C;
-            --border: #E5E7EB;
-            --step-active: #F97315;
-            --step-playing: #F97315;
-            --step-inactive: #FFFFFF;
-            
-            /* Pastel colors for drums */
-            --kick-color: #FFB5E8;
-            --snare-color: #B5DEFF;
-            --hihat-color: #C7FFB5;
-            --openhat-color: #FFF5B5;
-            --clap-color: #E5B5FF;
+            /* Hardware-inspired color palette */
+            --bg-primary: #0a0e14;
+            --bg-secondary: #151922;
+            --bg-tertiary: #1f2430;
+            --bg-panel: #0d1117;
+
+            --text-primary: #e6e8eb;
+            --text-secondary: #8a919e;
+            --text-dim: #5c6370;
+
+            /* High-contrast accent colors */
+            --accent-primary: #00ff9f;
+            --accent-secondary: #00d4ff;
+            --accent-warning: #ffaa00;
+            --accent-error: #ff3366;
+
+            /* Unique instrument colors */
+            --kick-color: #ff3366;
+            --snare-color: #00d4ff;
+            --hihat-color: #00ff9f;
+            --openhat-color: #ffaa00;
+            --clap-color: #a855f7;
+
+            /* Piano/melody colors */
+            --melody-color: #00ff9f;
+            --melody-glow: rgba(0, 255, 159, 0.3);
+
+            /* Border and grid */
+            --border-thin: #2a3340;
+            --border-glow: rgba(0, 255, 159, 0.2);
+            --grid-line: #1a1f2b;
+
+            /* Depth */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.6);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.7);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.8);
+            --shadow-glow: 0 0 20px rgba(0, 255, 159, 0.4);
+
+            /* Spacing system */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+
+            /* Border radius */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
         }
 
         * {
@@ -35,132 +89,260 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-secondary);
+            font-family: 'Share Tech Mono', 'Courier Prime', monospace;
+            background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: var(--space-lg);
             font-size: 13px;
-            letter-spacing: -0.01em;
+            letter-spacing: 0.02em;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px);
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" /></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.05"/></svg>');
+            opacity: 0.3;
+            pointer-events: none;
+            animation: noise 8s steps(10) infinite;
+            z-index: 1;
         }
 
         .drum-machine {
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: 16px;
+            background: var(--bg-panel);
+            border: 2px solid var(--border-thin);
+            border-radius: var(--radius-lg);
             width: 100%;
-            max-width: 840px;
-            padding: 32px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            max-width: 900px;
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            position: relative;
+            z-index: 2;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .drum-machine::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            border-radius: var(--radius-lg);
+            opacity: 0.1;
+            z-index: -1;
         }
 
         .header {
-            margin-bottom: 32px;
+            margin-bottom: var(--space-xl);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--border-thin);
         }
 
         .header-titles {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: var(--space-xs);
         }
 
         .logo {
-            font-size: 24px;
-            font-weight: 300;
-            letter-spacing: -0.02em;
-            color: var(--text-primary);
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--melody-glow);
+            font-family: 'Courier Prime', monospace;
         }
 
         .subtitle {
-            font-size: 12px;
+            font-size: 9px;
             font-weight: 400;
-            letter-spacing: 0.08em;
-            color: var(--text-secondary);
+            letter-spacing: 0.15em;
+            color: var(--text-dim);
             text-transform: uppercase;
         }
 
         .status-indicator {
-            width: 8px;
-            height: 8px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            background: var(--border);
-            transition: all 0.2s;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-thin);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .status-indicator::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: var(--accent-error);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .status-indicator.active {
-            background: var(--accent);
-            box-shadow: 0 0 8px var(--accent);
+            background: var(--accent-error);
+            border-color: var(--accent-error);
+            box-shadow: 0 0 12px var(--accent-error), inset 0 0 8px rgba(255, 255, 255, 0.5);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .status-indicator.active::before {
+            opacity: 0.3;
+            animation: glow 2s ease-in-out infinite;
         }
 
         .ai-input {
             display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
+            padding: var(--space-lg);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-thin);
+            border-radius: var(--radius-md);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .input-field {
             flex: 1;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 14px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-thin);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
             color: var(--text-primary);
-            font-family: inherit;
-            font-size: 13px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
             outline: none;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
         }
 
         .input-field:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(249, 115, 21, 0.1);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px var(--border-glow), inset 0 1px 2px rgba(0, 0, 0, 0.4);
+            background: var(--bg-panel);
         }
 
         .input-field::placeholder {
-            color: var(--text-secondary);
+            color: var(--text-dim);
         }
 
         .btn {
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 16px;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 13px;
-            font-weight: 500;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-thin);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            color: var(--text-secondary);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
             white-space: nowrap;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.3s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn:hover {
             background: var(--bg-secondary);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .btn.primary {
-            background: var(--text-primary);
-            border-color: var(--text-primary);
-            color: white;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            border-color: var(--accent-primary);
+            color: var(--bg-primary);
+            font-weight: 700;
+            box-shadow: 0 0 20px rgba(0, 255, 159, 0.3), 0 4px 8px rgba(0, 0, 0, 0.5);
         }
 
         .btn.primary:hover {
-            background: #1F2937;
-            border-color: #1F2937;
+            box-shadow: 0 0 30px rgba(0, 255, 159, 0.5), 0 6px 12px rgba(0, 0, 0, 0.6);
+            transform: translateY(-2px);
         }
 
         .btn:disabled {
-            opacity: 0.5;
+            opacity: 0.3;
             cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn:disabled:hover {
+            transform: none;
+            border-color: var(--border-thin);
+            color: var(--text-secondary);
+        }
+
+        /* Hide text in transport buttons, icons only */
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .transport .btn span,
+        .transport-controls .btn span {
+            display: none;
         }
 
         .transport {
@@ -191,43 +373,73 @@
 
         .tempo-slider {
             -webkit-appearance: none;
-            width: 120px;
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
+            appearance: none;
+            width: 140px;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-thin);
+            border-radius: var(--radius-sm);
             outline: none;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
         }
 
         .tempo-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: var(--accent);
-            border-radius: 50%;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-warning);
+            border-radius: 2px;
             cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid white;
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            transition: all 0.2s ease;
+            border: 2px solid var(--bg-primary);
+            box-shadow: 0 0 10px rgba(255, 170, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .tempo-slider::-webkit-slider-thumb:hover {
             transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 170, 0, 0.8), 0 4px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        .tempo-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--accent-warning);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid var(--bg-primary);
+            box-shadow: 0 0 10px rgba(255, 170, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .tempo-value {
-            font-family: 'SF Mono', 'Roboto Mono', monospace;
-            font-size: 12px;
-            color: var(--text-primary);
-            min-width: 60px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: var(--accent-warning);
+            min-width: 70px;
             text-align: right;
+            font-weight: 700;
+            letter-spacing: 0.05em;
         }
 
         .sequencer {
             background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
+            border: 2px solid var(--border-thin);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.03);
+            position: relative;
+        }
+
+        .sequencer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
         }
 
         .track {
@@ -252,59 +464,73 @@
 
         .step {
             aspect-ratio: 1;
-            background: var(--step-inactive);
-            border: 1px solid var(--border);
-            border-radius: 6px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--grid-line);
+            border-radius: var(--radius-sm);
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.12s ease;
             position: relative;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .step::before {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border-radius: 2px;
+            background: transparent;
+            transition: all 0.12s ease;
         }
 
         .step:hover {
-            border-color: var(--accent);
+            border-color: var(--border-thin);
             transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         .step.active {
-            background: var(--step-active);
-            border-color: var(--step-active);
-            color: white;
+            box-shadow: 0 0 10px currentColor, inset 0 0 8px currentColor;
+            border-width: 2px;
         }
 
-        /* Individual drum colors */
+        .step.active::before {
+            background: currentColor;
+            opacity: 0.9;
+        }
+
+        /* Individual drum colors with glow */
         .track[data-instrument="kick"] .step.active {
-            background: var(--kick-color);
+            color: var(--kick-color);
             border-color: var(--kick-color);
         }
 
         .track[data-instrument="snare"] .step.active {
-            background: var(--snare-color);
+            color: var(--snare-color);
             border-color: var(--snare-color);
         }
 
         .track[data-instrument="hihat"] .step.active {
-            background: var(--hihat-color);
+            color: var(--hihat-color);
             border-color: var(--hihat-color);
         }
 
         .track[data-instrument="openhat"] .step.active {
-            background: var(--openhat-color);
+            color: var(--openhat-color);
             border-color: var(--openhat-color);
         }
 
         .track[data-instrument="clap"] .step.active {
-            background: var(--clap-color);
+            color: var(--clap-color);
             border-color: var(--clap-color);
         }
 
         .step.playing {
-            box-shadow: 0 0 0 3px rgba(249, 115, 21, 0.3);
-            transform: scale(1.1);
+            animation: glow 0.4s ease-in-out;
+            transform: scale(1.05);
         }
 
         .step.active.playing {
-            background: var(--step-playing);
-            border-color: var(--step-playing);
+            box-shadow: 0 0 20px currentColor, inset 0 0 12px currentColor;
         }
 
         .step:nth-child(4n+2) {
@@ -326,10 +552,22 @@
 
         .piano-roll-container {
             background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            margin-top: 24px;
+            border: 2px solid var(--border-thin);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-top: var(--space-lg);
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.03);
+            position: relative;
+        }
+
+        .piano-roll-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
         }
 
         .piano-roll-header {
@@ -383,12 +621,12 @@
             top: 0;
             bottom: 0;
             left: 60px;
-            background: rgba(249, 115, 21, 0.15);
-            border-left: 2px solid var(--accent);
-            border-right: 2px solid var(--accent);
+            background: rgba(230, 232, 235, 0.1);
+            border-left: 2px solid var(--text-primary);
+            border-right: 2px solid var(--text-primary);
             pointer-events: none;
             z-index: 5;
-            transition: left 0.05s linear;
+            box-shadow: 0 0 20px rgba(230, 232, 235, 0.3), inset 0 0 20px rgba(230, 232, 235, 0.2);
             display: none;
         }
 
@@ -437,87 +675,34 @@
         }
 
         .piano-cell {
-            border-right: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--grid-line);
+            border-bottom: 1px solid var(--grid-line);
+            background: var(--bg-tertiary);
             cursor: pointer;
             position: relative;
-            transition: all 0.15s;
+            transition: all 0.12s ease;
         }
 
-        .piano-cell:hover {
-            background: rgba(249, 115, 21, 0.1);
+        .piano-cell::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: transparent;
+            transition: all 0.12s ease;
+        }
+
+        .piano-cell:hover::before {
+            background: var(--melody-glow);
         }
 
         .piano-cell.active {
-            background: var(--accent);
+            background: var(--melody-color);
+            box-shadow: 0 0 10px var(--melody-glow), inset 0 0 8px var(--melody-glow);
         }
 
-        /* Piano roll gradient - red to orange based on row position */
-        .piano-cell.active {
-            background: linear-gradient(180deg, #EF4444 0%, #F97316 100%);
-        }
-
-        .piano-cell:nth-child(16n+1).active,
-        .piano-cell:nth-child(16n+2).active,
-        .piano-cell:nth-child(16n+3).active,
-        .piano-cell:nth-child(16n+4).active,
-        .piano-cell:nth-child(16n+5).active,
-        .piano-cell:nth-child(16n+6).active,
-        .piano-cell:nth-child(16n+7).active,
-        .piano-cell:nth-child(16n+8).active,
-        .piano-cell:nth-child(16n+9).active,
-        .piano-cell:nth-child(16n+10).active,
-        .piano-cell:nth-child(16n+11).active,
-        .piano-cell:nth-child(16n+12).active,
-        .piano-cell:nth-child(16n+13).active,
-        .piano-cell:nth-child(16n+14).active,
-        .piano-cell:nth-child(16n+15).active,
-        .piano-cell:nth-child(16n+16).active {
-            background: #DC2626;
-        }
-
-        .piano-cell:nth-child(n+17):nth-child(-n+32).active {
-            background: #E63946;
-        }
-
-        .piano-cell:nth-child(n+33):nth-child(-n+48).active {
-            background: #EF4444;
-        }
-
-        .piano-cell:nth-child(n+49):nth-child(-n+64).active {
-            background: #F15B5B;
-        }
-
-        .piano-cell:nth-child(n+65):nth-child(-n+80).active {
-            background: #F87171;
-        }
-
-        .piano-cell:nth-child(n+81):nth-child(-n+96).active {
-            background: #FB7A5F;
-        }
-
-        .piano-cell:nth-child(n+97):nth-child(-n+112).active {
-            background: #FC8D59;
-        }
-
-        .piano-cell:nth-child(n+113):nth-child(-n+128).active {
-            background: #FD9B5A;
-        }
-
-        .piano-cell:nth-child(n+129):nth-child(-n+144).active {
-            background: #FEA75B;
-        }
-
-        .piano-cell:nth-child(n+145):nth-child(-n+160).active {
-            background: #FDB574;
-        }
-
-        .piano-cell:nth-child(n+161):nth-child(-n+176).active {
-            background: #FDB574;
-        }
-
-        .piano-cell:nth-child(n+177):nth-child(-n+192).active {
-            background: #FDB574;
+        .piano-cell.active::before {
+            background: var(--melody-color);
+            opacity: 0.9;
         }
 
         .piano-cell:nth-child(4n+1) {
@@ -552,15 +737,18 @@
         }
 
         .idea-btn {
-            padding: 6px 12px;
-            font-size: 12px;
-            background: var(--bg-secondary);
-            border-color: var(--border);
+            padding: 8px 12px;
+            font-size: 10px;
+            background: var(--bg-panel);
+            border-color: var(--border-thin);
+            color: var(--text-dim);
+            letter-spacing: 0.08em;
         }
 
         .idea-btn:hover {
             background: var(--bg-tertiary);
-            border-color: var(--text-secondary);
+            border-color: var(--accent-secondary);
+            color: var(--accent-secondary);
         }
 
         .divider {
@@ -572,18 +760,22 @@
 
         .status-message {
             position: fixed;
-            bottom: 24px;
+            bottom: var(--space-xl);
             left: 50%;
             transform: translateX(-50%);
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 16px;
-            font-size: 12px;
+            background: var(--bg-panel);
+            border: 2px solid var(--border-thin);
+            border-radius: var(--radius-sm);
+            padding: 12px 24px;
+            font-size: 11px;
             color: var(--text-primary);
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
             display: none;
             animation: slideUp 0.3s ease-out;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            z-index: 1001;
         }
 
         .status-message.show {
@@ -591,13 +783,15 @@
         }
 
         .status-message.error {
-            border-color: #EF4444;
-            color: #EF4444;
+            border-color: var(--accent-error);
+            color: var(--accent-error);
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.4), var(--shadow-lg);
         }
 
         .status-message.success {
-            border-color: #10B981;
-            color: #10B981;
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            box-shadow: 0 0 20px var(--melody-glow), var(--shadow-lg);
         }
 
         @keyframes slideUp {
@@ -617,8 +811,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
+            background: rgba(10, 14, 20, 0.95);
+            backdrop-filter: blur(8px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -630,22 +824,25 @@
         }
 
         .loading-content {
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px 48px;
+            background: var(--bg-panel);
+            border: 2px solid var(--accent-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl) 48px;
             text-align: center;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            box-shadow: 0 0 40px var(--melody-glow), var(--shadow-lg);
+            min-width: 300px;
         }
 
         .loading-spinner {
             width: 48px;
             height: 48px;
-            margin: 0 auto 16px;
-            border: 3px solid var(--border);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            margin: 0 auto var(--space-md);
+            border: 3px solid var(--bg-tertiary);
+            border-top-color: var(--accent-primary);
+            border-right-color: var(--accent-secondary);
+            border-radius: 2px;
+            animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+            box-shadow: 0 0 20px var(--melody-glow);
         }
 
         @keyframes spin {
@@ -655,15 +852,20 @@
         }
 
         .loading-text {
-            font-size: 14px;
-            color: var(--text-primary);
-            font-weight: 500;
-            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--accent-primary);
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-family: 'Share Tech Mono', monospace;
         }
 
         .loading-subtext {
-            font-size: 12px;
-            color: var(--text-secondary);
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
 
         @media (max-width: 768px) {
@@ -691,10 +893,9 @@
     <div class="drum-machine">
         <div class="header">
             <div class="header-titles">
-                <div class="logo">RHYTHM MACHINE</div>
-                <div class="subtitle">AI-POWERED=</div>
+                <div class="logo">LIL BEAT GENERATOR</div>
+                <div class="subtitle">ARE YOU A PRODUCER WITH CREATIVE BLOCK? TRY THIS.</div>
             </div>
-            <div class="status-indicator" id="statusIndicator"></div>
         </div>
 
         <div class="ai-input">
@@ -702,7 +903,7 @@
                 type="text" 
                 class="input-field" 
                 id="beatInput" 
-                placeholder="Describe your beat (e.g., 'minimal techno', 'trap drums', 'vintage funk')"
+                placeholder="describe your beat"
                 autocomplete="off"
             />
             <button class="btn primary" id="generateBtn">Generate</button>
@@ -710,13 +911,13 @@
 
         <div class="idea-buttons">
             <span class="idea-label">Try these:</span>
-            <button class="btn idea-btn" data-idea="808 cowbell rhythm">808 Cowbell</button>
-            <button class="btn idea-btn" data-idea="experimental glitch drums">Glitch</button>
-            <button class="btn idea-btn" data-idea="jazz fusion groove">Jazz Fusion</button>
-            <button class="btn idea-btn" data-idea="afrobeat percussion">Afrobeat</button>
-            <button class="btn idea-btn" data-idea="lo-fi hip hop beat">Lo-Fi</button>
-            <button class="btn idea-btn" data-idea="stadium rock drums">Stadium Rock</button>
-            <button class="btn idea-btn" data-idea="ambient electronic pulse">Ambient</button>
+            <button class="btn idea-btn" data-idea="breakbeat jungle rhythm">Breakbeat</button>
+            <button class="btn idea-btn" data-idea="synthwave retro drums">Synthwave</button>
+            <button class="btn idea-btn" data-idea="boom bap hip hop">Boom Bap</button>
+            <button class="btn idea-btn" data-idea="uk garage shuffle">UK Garage</button>
+            <button class="btn idea-btn" data-idea="drill aggressive beat">Drill</button>
+            <button class="btn idea-btn" data-idea="drum and bass fast">D&B</button>
+            <button class="btn idea-btn" data-idea="vaporwave dreamy">Vaporwave</button>
         </div>
 
         <div class="divider"></div>
@@ -1312,9 +1513,7 @@
                 isPlaying = true;
                 const tempo = parseInt(document.getElementById('tempoSlider').value);
                 const interval = (60 / tempo / 4) * 1000; // 16th notes
-                
-                document.getElementById('statusIndicator').classList.add('active');
-                
+
                 // Show piano playhead
                 const pianoPlayhead = document.getElementById('pianoPlayhead');
                 if (pianoPlayhead) {
@@ -1340,8 +1539,7 @@
         function pause() {
             isPlaying = false;
             clearInterval(intervalId);
-            document.getElementById('statusIndicator').classList.remove('active');
-            
+
             const playBtn = document.getElementById('playBtn');
             playBtn.innerHTML = `
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
