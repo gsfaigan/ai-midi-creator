@@ -1,8 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Initialize Google Gemini client
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-
 export default async function handler(req, res) {
     // Enable CORS
     res.setHeader('Access-Control-Allow-Credentials', true);
@@ -32,14 +29,18 @@ export default async function handler(req, res) {
         }
 
         // Check if API key is configured
-        if (!process.env.GEMINI_API_KEY) {
-            console.error('⚠️  WARNING: GEMINI_API_KEY not found in environment variables');
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            console.error('⚠️  GEMINI_API_KEY not found in environment variables');
+            console.error('Available env vars:', Object.keys(process.env).join(', '));
             return res.status(500).json({
                 error: 'API key not configured',
-                message: 'Please configure GEMINI_API_KEY in Vercel environment variables'
+                message: 'GEMINI_API_KEY environment variable is not set'
             });
         }
 
+        // Initialize Gemini client
+        const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         // Generate both drum and piano patterns in parallel
