@@ -482,6 +482,11 @@
             box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
+        /* Disable transitions during drag for performance */
+        .dragging .step {
+            transition: none !important;
+        }
+
         .step::before {
             content: '';
             position: absolute;
@@ -489,6 +494,10 @@
             border-radius: 2px;
             background: transparent;
             transition: all 0.12s ease;
+        }
+
+        .dragging .step::before {
+            transition: none !important;
         }
 
         .step:hover {
@@ -695,12 +704,21 @@
             transition: all 0.12s ease;
         }
 
+        /* Disable transitions during drag for performance */
+        .dragging .piano-cell {
+            transition: none !important;
+        }
+
         .piano-cell::before {
             content: '';
             position: absolute;
             inset: 0;
             background: transparent;
             transition: all 0.12s ease;
+        }
+
+        .dragging .piano-cell::before {
+            transition: none !important;
         }
 
         .piano-cell:hover::before {
@@ -1199,6 +1217,16 @@
         let intervalId = null;
         let pattern = {};
 
+        // Pre-generated audio buffers for performance
+        let audioBuffers = {};
+
+        // Cached DOM elements for performance
+        let cachedStepElements = {};
+        let cachedPianoCells = {}; // Cache piano cells: {note: {step: element}}
+
+        // Pre-compiled regex for note parsing
+        const noteRegex = /([A-G]#?)(\d+)/;
+
 
         // Initialize empty pattern
         instruments.forEach(inst => {
@@ -1211,12 +1239,54 @@
             pianoPattern[key] = new Array(STEPS).fill(0);
         });
 
+        // Pre-generate audio buffers for performance (called once)
+        function initializeAudioBuffers() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            // Generate snare buffer
+            const snareBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.2, audioContext.sampleRate);
+            const snareData = snareBuffer.getChannelData(0);
+            for (let i = 0; i < snareBuffer.length; i++) {
+                snareData[i] = Math.random() * 2 - 1;
+            }
+            audioBuffers.snare = snareBuffer;
+
+            // Generate hihat buffer
+            const hihatBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.05, audioContext.sampleRate);
+            const hihatData = hihatBuffer.getChannelData(0);
+            for (let i = 0; i < hihatBuffer.length; i++) {
+                hihatData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioContext.sampleRate * 0.1));
+            }
+            audioBuffers.hihat = hihatBuffer;
+
+            // Generate openhat buffer
+            const openhatBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.3, audioContext.sampleRate);
+            const openhatData = openhatBuffer.getChannelData(0);
+            for (let i = 0; i < openhatBuffer.length; i++) {
+                openhatData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioContext.sampleRate * 0.1));
+            }
+            audioBuffers.openhat = openhatBuffer;
+
+            // Generate clap buffer
+            const clapBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.1, audioContext.sampleRate);
+            const clapData = clapBuffer.getChannelData(0);
+            for (let i = 0; i < clapBuffer.length; i++) {
+                clapData[i] = Math.random() * 2 - 1;
+            }
+            audioBuffers.clap = clapBuffer;
+        }
+
         // Create sequencer grid
         function createSequencer() {
             const sequencer = document.getElementById('sequencer');
             const tracks = sequencer.querySelectorAll('.track');
-            
+
             instruments.forEach((inst, i) => {
+                if (!cachedStepElements[inst]) {
+                    cachedStepElements[inst] = [];
+                }
                 for (let j = 0; j < STEPS; j++) {
                     const step = document.createElement('div');
                     step.className = 'step';
@@ -1226,6 +1296,8 @@
                     step.addEventListener('mouseenter', handleDrumMouseEnter);
                     step.addEventListener('mouseup', handleDrumMouseUp);
                     tracks[i].appendChild(step);
+                    // Cache the element reference
+                    cachedStepElements[inst][j] = step;
                 }
             });
         }
@@ -1234,10 +1306,13 @@
         function createPianoRoll() {
             const pianoKeys = document.getElementById('pianoKeys');
             const pianoGrid = document.getElementById('pianoGrid');
-            
+
             pianoKeys.innerHTML = '';
             pianoGrid.innerHTML = '';
-            
+
+            // Reset cache
+            cachedPianoCells = {};
+
             // Create keys (bottom to top: C to B)
             for (let i = notes.length - 1; i >= 0; i--) {
                 const note = notes[i];
@@ -1251,12 +1326,17 @@
                 key.addEventListener('click', () => playPianoNote(note, currentOctave));
                 pianoKeys.appendChild(key);
             }
-            
+
             // Create grid (top to bottom to match keys)
             for (let i = notes.length - 1; i >= 0; i--) {
                 const note = notes[i];
                 const noteKey = `${note}${currentOctave}`;
-                
+
+                // Initialize cache for this note
+                if (!cachedPianoCells[noteKey]) {
+                    cachedPianoCells[noteKey] = [];
+                }
+
                 for (let j = 0; j < STEPS; j++) {
                     const cell = document.createElement('div');
                     cell.className = 'piano-cell';
@@ -1266,6 +1346,9 @@
                     cell.addEventListener('mouseenter', handlePianoMouseEnter);
                     cell.addEventListener('mouseup', handlePianoMouseUp);
                     pianoGrid.appendChild(cell);
+
+                    // Cache the element
+                    cachedPianoCells[noteKey][j] = cell;
                 }
             }
         }
@@ -1291,16 +1374,19 @@
             e.target.classList.toggle('active');
         }
 
-        // Drum drag handlers
+        // Drum drag handlers (optimized)
         function handleDrumMouseDown(e) {
             isDragging = true;
             dragType = 'drum';
             const inst = e.target.dataset.instrument;
             const step = parseInt(e.target.dataset.step);
-            
+
+            // Add dragging class to disable transitions
+            document.body.classList.add('dragging');
+
             // Determine if we're adding or removing
             dragMode = pattern[inst][step] ? 'remove' : 'add';
-            
+
             // Toggle this step
             toggleStep(e);
         }
@@ -1309,8 +1395,8 @@
             if (isDragging && dragType === 'drum') {
                 const inst = e.target.dataset.instrument;
                 const step = parseInt(e.target.dataset.step);
-                
-                // Apply the drag mode
+
+                // Apply the drag mode (only if state needs to change)
                 if (dragMode === 'add' && !pattern[inst][step]) {
                     pattern[inst][step] = 1;
                     e.target.classList.add('active');
@@ -1326,23 +1412,29 @@
                 isDragging = false;
                 dragMode = null;
                 dragType = null;
+
+                // Remove dragging class to re-enable transitions
+                document.body.classList.remove('dragging');
             }
         }
 
-        // Piano drag handlers
+        // Piano drag handlers (optimized)
         function handlePianoMouseDown(e) {
             isDragging = true;
             dragType = 'piano';
             const note = e.target.dataset.note;
             const step = parseInt(e.target.dataset.step);
-            
+
+            // Add dragging class to disable transitions
+            document.body.classList.add('dragging');
+
             if (!pianoPattern[note]) {
                 pianoPattern[note] = new Array(STEPS).fill(0);
             }
-            
+
             // Determine if we're adding or removing
             dragMode = pianoPattern[note][step] ? 'remove' : 'add';
-            
+
             // Toggle this cell
             togglePianoCell(e);
         }
@@ -1351,12 +1443,12 @@
             if (isDragging && dragType === 'piano') {
                 const note = e.target.dataset.note;
                 const step = parseInt(e.target.dataset.step);
-                
+
                 if (!pianoPattern[note]) {
                     pianoPattern[note] = new Array(STEPS).fill(0);
                 }
-                
-                // Apply the drag mode
+
+                // Apply the drag mode (only if state needs to change)
                 if (dragMode === 'add' && !pianoPattern[note][step]) {
                     pianoPattern[note][step] = 1;
                     e.target.classList.add('active');
@@ -1372,14 +1464,17 @@
                 isDragging = false;
                 dragMode = null;
                 dragType = null;
+
+                // Remove dragging class to re-enable transitions
+                document.body.classList.remove('dragging');
             }
         }
 
-        // Update pattern display
+        // Update pattern display (optimized with cached elements)
         function updatePattern() {
             instruments.forEach(inst => {
                 pattern[inst].forEach((value, step) => {
-                    const element = document.querySelector(`[data-instrument="${inst}"][data-step="${step}"]`);
+                    const element = cachedStepElements[inst][step];
                     if (element) {
                         if (value) {
                             element.classList.add('active');
@@ -1391,19 +1486,20 @@
             });
         }
 
-        // Update piano pattern display
+        // Update piano pattern display (optimized with cached elements)
         function updatePianoPattern() {
-            const pianoCells = document.querySelectorAll('.piano-cell');
-            pianoCells.forEach(cell => {
-                const note = cell.dataset.note;
-                const step = parseInt(cell.dataset.step);
-                
-                if (pianoPattern[note] && pianoPattern[note][step]) {
-                    cell.classList.add('active');
-                } else {
-                    cell.classList.remove('active');
+            for (const note in cachedPianoCells) {
+                for (let step = 0; step < STEPS; step++) {
+                    const cell = cachedPianoCells[note][step];
+                    if (cell) {
+                        if (pianoPattern[note] && pianoPattern[note][step]) {
+                            cell.classList.add('active');
+                        } else {
+                            cell.classList.remove('active');
+                        }
+                    }
                 }
-            });
+            }
         }
 
         function clearDrums() {
@@ -1420,12 +1516,12 @@
             updatePianoPattern();
         }
 
-        // Audio synthesis
+        // Audio synthesis (optimized with pre-generated buffers)
         function playSound(inst) {
             if (!audioContext) return;
-            
+
             const now = audioContext.currentTime;
-            
+
             switch(inst) {
                 case 'kick':
                     const kickOsc = audioContext.createOscillator();
@@ -1439,16 +1535,10 @@
                     kickOsc.start(now);
                     kickOsc.stop(now + 0.5);
                     break;
-                    
+
                 case 'snare':
-                    // White noise for snare
-                    const snareBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.2, audioContext.sampleRate);
-                    const snareData = snareBuffer.getChannelData(0);
-                    for (let i = 0; i < snareBuffer.length; i++) {
-                        snareData[i] = Math.random() * 2 - 1;
-                    }
                     const snareSource = audioContext.createBufferSource();
-                    snareSource.buffer = snareBuffer;
+                    snareSource.buffer = audioBuffers.snare;
                     const snareGain = audioContext.createGain();
                     snareSource.connect(snareGain);
                     snareGain.connect(audioContext.destination);
@@ -1456,16 +1546,10 @@
                     snareGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
                     snareSource.start(now);
                     break;
-                    
+
                 case 'hihat':
-                case 'openhat':
-                    const hihatBuffer = audioContext.createBuffer(1, audioContext.sampleRate * (inst === 'openhat' ? 0.3 : 0.05), audioContext.sampleRate);
-                    const hihatData = hihatBuffer.getChannelData(0);
-                    for (let i = 0; i < hihatBuffer.length; i++) {
-                        hihatData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioContext.sampleRate * 0.1));
-                    }
                     const hihatSource = audioContext.createBufferSource();
-                    hihatSource.buffer = hihatBuffer;
+                    hihatSource.buffer = audioBuffers.hihat;
                     const hihatGain = audioContext.createGain();
                     const hihatFilter = audioContext.createBiquadFilter();
                     hihatFilter.type = 'highpass';
@@ -1474,18 +1558,28 @@
                     hihatFilter.connect(hihatGain);
                     hihatGain.connect(audioContext.destination);
                     hihatGain.gain.setValueAtTime(0.1, now);
-                    hihatGain.gain.exponentialRampToValueAtTime(0.01, now + (inst === 'openhat' ? 0.3 : 0.05));
+                    hihatGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
                     hihatSource.start(now);
                     break;
-                    
+
+                case 'openhat':
+                    const openhatSource = audioContext.createBufferSource();
+                    openhatSource.buffer = audioBuffers.openhat;
+                    const openhatGain = audioContext.createGain();
+                    const openhatFilter = audioContext.createBiquadFilter();
+                    openhatFilter.type = 'highpass';
+                    openhatFilter.frequency.value = 8000;
+                    openhatSource.connect(openhatFilter);
+                    openhatFilter.connect(openhatGain);
+                    openhatGain.connect(audioContext.destination);
+                    openhatGain.gain.setValueAtTime(0.1, now);
+                    openhatGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    openhatSource.start(now);
+                    break;
+
                 case 'clap':
-                    const clapBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.1, audioContext.sampleRate);
-                    const clapData = clapBuffer.getChannelData(0);
-                    for (let i = 0; i < clapBuffer.length; i++) {
-                        clapData[i] = Math.random() * 2 - 1;
-                    }
                     const clapSource = audioContext.createBufferSource();
-                    clapSource.buffer = clapBuffer;
+                    clapSource.buffer = audioBuffers.clap;
                     const clapGain = audioContext.createGain();
                     clapSource.connect(clapGain);
                     clapGain.connect(audioContext.destination);
@@ -1500,8 +1594,9 @@
         function playPianoNote(note, octave) {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                initializeAudioBuffers(); // Pre-generate audio buffers
             }
-            
+
             const now = audioContext.currentTime;
             const noteIndex = notes.indexOf(note);
             const frequency = 440 * Math.pow(2, (octave - 4) + (noteIndex - 9) / 12); // A4 = 440Hz
@@ -1521,57 +1616,48 @@
             osc.stop(now + 0.5);
         }
 
-        // Sequencer playback
+        // Sequencer playback (optimized)
         function advanceSequencer() {
-            // Remove playing class from all steps
-            document.querySelectorAll('.step').forEach(el => {
-                el.classList.remove('playing');
-            });
-            
-            // Update piano playhead position - snap to grid
-            const pianoPlayhead = document.getElementById('pianoPlayhead');
-            const pianoGrid = document.getElementById('pianoGrid');
-            if (pianoPlayhead && pianoGrid) {
-                // Get the first cell in the current step to calculate position
-                const firstCell = pianoGrid.querySelector(`[data-step="${currentStep}"]`);
-                if (firstCell) {
-                    const gridRect = pianoGrid.getBoundingClientRect();
-                    const cellRect = firstCell.getBoundingClientRect();
-                    const pianoRollRect = pianoPlayhead.parentElement.getBoundingClientRect();
-                    
-                    // Calculate position relative to piano roll container
-                    const leftPosition = cellRect.left - pianoRollRect.left;
-                    const cellWidth = cellRect.width;
-                    
-                    pianoPlayhead.style.left = `${leftPosition}px`;
-                    pianoPlayhead.style.width = `${cellWidth}px`;
-                }
-            }
-            
-            // Add playing class to current step and play sounds
+            // Remove playing class from previous step (more efficient than querying all)
+            const prevStep = currentStep === 0 ? STEPS - 1 : currentStep - 1;
             instruments.forEach(inst => {
-                const el = document.querySelector(`[data-instrument="${inst}"][data-step="${currentStep}"]`);
+                const el = cachedStepElements[inst][prevStep];
+                if (el) el.classList.remove('playing');
+            });
+
+            // Update piano playhead position using calculated offset (no getBoundingClientRect)
+            const pianoPlayhead = document.getElementById('pianoPlayhead');
+            if (pianoPlayhead) {
+                // Calculate position based on step width (40px per step + 60px offset)
+                const stepWidth = 40;
+                const offset = 60;
+                pianoPlayhead.style.left = `${offset + (currentStep * stepWidth)}px`;
+                pianoPlayhead.style.width = `${stepWidth}px`;
+            }
+
+            // Add playing class to current step and play sounds (using cached elements)
+            instruments.forEach(inst => {
+                const el = cachedStepElements[inst][currentStep];
                 if (el) {
                     el.classList.add('playing');
-                    
+
                     if (pattern[inst][currentStep]) {
                         playSound(inst);
                     }
                 }
             });
-            
-            // Play piano notes
-            Object.keys(pianoPattern).forEach(noteKey => {
+
+            // Play piano notes (using pre-compiled regex)
+            for (const noteKey in pianoPattern) {
                 if (pianoPattern[noteKey][currentStep]) {
-                    // Extract note and octave
-                    const match = noteKey.match(/([A-G]#?)(\d+)/);
+                    const match = noteKey.match(noteRegex);
                     if (match) {
                         const [, note, octave] = match;
                         playPianoNote(note, parseInt(octave));
                     }
                 }
-            });
-            
+            }
+
             currentStep = (currentStep + 1) % STEPS;
         }
 
@@ -1579,8 +1665,9 @@
         function play() {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                initializeAudioBuffers(); // Pre-generate audio buffers for performance
             }
-            
+
             if (!isPlaying) {
                 isPlaying = true;
                 const tempo = parseInt(document.getElementById('tempoSlider').value);
@@ -1624,10 +1711,15 @@
         function stop() {
             pause();
             currentStep = 0;
-            document.querySelectorAll('.step').forEach(el => {
-                el.classList.remove('playing');
+
+            // Remove playing class using cached elements (much faster)
+            instruments.forEach(inst => {
+                for (let i = 0; i < STEPS; i++) {
+                    const el = cachedStepElements[inst][i];
+                    if (el) el.classList.remove('playing');
+                }
             });
-            
+
             // Reset and hide piano playhead
             const pianoPlayhead = document.getElementById('pianoPlayhead');
             if (pianoPlayhead) {
@@ -2128,6 +2220,8 @@
             isDragging = false;
             dragMode = null;
             dragType = null;
+            // Remove dragging class when mouse released anywhere
+            document.body.classList.remove('dragging');
         });
         
         document.getElementById('beatInput').addEventListener('keypress', (e) => {
