@@ -1687,7 +1687,7 @@
             
             try {
                 // Call backend API to generate patterns
-                const response = await fetch("http://localhost:3001/api/generate", {
+                const response = await fetch("/api/generate", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
