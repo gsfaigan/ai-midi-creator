@@ -1217,6 +1217,15 @@
         let intervalId = null;
         let pattern = {};
 
+        // Audio-synced timing (for precise playback)
+        let nextNoteTime = 0;
+        let scheduleAheadTime = 0.1; // Schedule 100ms ahead
+        let tempo = 120;
+        let lookaheadInterval = 25; // Check every 25ms
+        let timerID;
+        let visualStep = 0; // For visual display
+        let startTime = 0; // When the sequence started
+
         // Pre-generated audio buffers for performance
         let audioBuffers = {};
 
@@ -1516,11 +1525,18 @@
             updatePianoPattern();
         }
 
-        // Audio synthesis (optimized with pre-generated buffers)
+        // Audio synthesis - immediate playback (for clicking)
         function playSound(inst) {
-            if (!audioContext) return;
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                initializeAudioBuffers();
+            }
+            playSoundAtTime(inst, audioContext.currentTime);
+        }
 
-            const now = audioContext.currentTime;
+        // Audio synthesis - scheduled playback (optimized with pre-generated buffers)
+        function playSoundAtTime(inst, time) {
+            if (!audioContext) return;
 
             switch(inst) {
                 case 'kick':
@@ -1528,12 +1544,12 @@
                     const kickGain = audioContext.createGain();
                     kickOsc.connect(kickGain);
                     kickGain.connect(audioContext.destination);
-                    kickOsc.frequency.setValueAtTime(60, now);
-                    kickOsc.frequency.exponentialRampToValueAtTime(0.01, now + 0.5);
-                    kickGain.gain.setValueAtTime(1, now);
-                    kickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-                    kickOsc.start(now);
-                    kickOsc.stop(now + 0.5);
+                    kickOsc.frequency.setValueAtTime(60, time);
+                    kickOsc.frequency.exponentialRampToValueAtTime(0.01, time + 0.5);
+                    kickGain.gain.setValueAtTime(1, time);
+                    kickGain.gain.exponentialRampToValueAtTime(0.01, time + 0.5);
+                    kickOsc.start(time);
+                    kickOsc.stop(time + 0.5);
                     break;
 
                 case 'snare':
@@ -1542,9 +1558,9 @@
                     const snareGain = audioContext.createGain();
                     snareSource.connect(snareGain);
                     snareGain.connect(audioContext.destination);
-                    snareGain.gain.setValueAtTime(0.3, now);
-                    snareGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                    snareSource.start(now);
+                    snareGain.gain.setValueAtTime(0.3, time);
+                    snareGain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+                    snareSource.start(time);
                     break;
 
                 case 'hihat':
@@ -1557,9 +1573,9 @@
                     hihatSource.connect(hihatFilter);
                     hihatFilter.connect(hihatGain);
                     hihatGain.connect(audioContext.destination);
-                    hihatGain.gain.setValueAtTime(0.1, now);
-                    hihatGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-                    hihatSource.start(now);
+                    hihatGain.gain.setValueAtTime(0.1, time);
+                    hihatGain.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
+                    hihatSource.start(time);
                     break;
 
                 case 'openhat':
@@ -1572,9 +1588,9 @@
                     openhatSource.connect(openhatFilter);
                     openhatFilter.connect(openhatGain);
                     openhatGain.connect(audioContext.destination);
-                    openhatGain.gain.setValueAtTime(0.1, now);
-                    openhatGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                    openhatSource.start(now);
+                    openhatGain.gain.setValueAtTime(0.1, time);
+                    openhatGain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
+                    openhatSource.start(time);
                     break;
 
                 case 'clap':
@@ -1583,85 +1599,138 @@
                     const clapGain = audioContext.createGain();
                     clapSource.connect(clapGain);
                     clapGain.connect(audioContext.destination);
-                    clapGain.gain.setValueAtTime(0.2, now);
-                    clapGain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                    clapSource.start(now);
+                    clapGain.gain.setValueAtTime(0.2, time);
+                    clapGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+                    clapSource.start(time);
                     break;
             }
         }
 
-        // Play piano note
+        // Play piano note - immediate (for clicking keys)
         function playPianoNote(note, octave) {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 initializeAudioBuffers(); // Pre-generate audio buffers
             }
-
-            const now = audioContext.currentTime;
-            const noteIndex = notes.indexOf(note);
-            const frequency = 440 * Math.pow(2, (octave - 4) + (noteIndex - 9) / 12); // A4 = 440Hz
-            
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(frequency, now);
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-            
-            osc.start(now);
-            osc.stop(now + 0.5);
+            playPianoNoteAtTime(note, octave, audioContext.currentTime);
         }
 
-        // Sequencer playback (optimized)
-        function advanceSequencer() {
-            // Remove playing class from previous step (more efficient than querying all)
-            const prevStep = currentStep === 0 ? STEPS - 1 : currentStep - 1;
+        // Play piano note - scheduled
+        function playPianoNoteAtTime(note, octave, time) {
+            if (!audioContext) return;
+
+            const noteIndex = notes.indexOf(note);
+            const frequency = 440 * Math.pow(2, (octave - 4) + (noteIndex - 9) / 12); // A4 = 440Hz
+
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(frequency, time);
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+
+            gain.gain.setValueAtTime(0.3, time);
+            gain.gain.exponentialRampToValueAtTime(0.01, time + 0.5);
+
+            osc.start(time);
+            osc.stop(time + 0.5);
+        }
+
+        // Schedule a single note at a specific time (audio-synced)
+        function scheduleNote(step, time) {
+            // Schedule audio to play at exact time
             instruments.forEach(inst => {
-                const el = cachedStepElements[inst][prevStep];
-                if (el) el.classList.remove('playing');
-            });
-
-            // Update piano playhead position using calculated offset (no getBoundingClientRect)
-            const pianoPlayhead = document.getElementById('pianoPlayhead');
-            if (pianoPlayhead) {
-                // Calculate position based on step width (40px per step + 60px offset)
-                const stepWidth = 40;
-                const offset = 60;
-                pianoPlayhead.style.left = `${offset + (currentStep * stepWidth)}px`;
-                pianoPlayhead.style.width = `${stepWidth}px`;
-            }
-
-            // Add playing class to current step and play sounds (using cached elements)
-            instruments.forEach(inst => {
-                const el = cachedStepElements[inst][currentStep];
-                if (el) {
-                    el.classList.add('playing');
-
-                    if (pattern[inst][currentStep]) {
-                        playSound(inst);
-                    }
+                if (pattern[inst][step]) {
+                    playSoundAtTime(inst, time);
                 }
             });
 
-            // Play piano notes (using pre-compiled regex)
+            // Schedule piano notes
             for (const noteKey in pianoPattern) {
-                if (pianoPattern[noteKey][currentStep]) {
+                if (pianoPattern[noteKey][step]) {
                     const match = noteKey.match(noteRegex);
                     if (match) {
                         const [, note, octave] = match;
-                        playPianoNote(note, parseInt(octave));
+                        playPianoNoteAtTime(note, parseInt(octave), time);
+                    }
+                }
+            }
+        }
+
+        // Lookahead scheduler (runs frequently to schedule upcoming notes)
+        function scheduler() {
+            if (!audioContext || !isPlaying) return;
+
+            while (nextNoteTime < audioContext.currentTime + scheduleAheadTime) {
+                scheduleNote(currentStep, nextNoteTime);
+
+                const secondsPerBeat = 60.0 / tempo;
+                const secondsPer16thNote = secondsPerBeat / 4;
+                nextNoteTime += secondsPer16thNote;
+
+                currentStep = (currentStep + 1) % STEPS;
+            }
+        }
+
+        // Visual update loop (synced to audio clock via RAF)
+        function updateVisuals() {
+            if (!isPlaying || !audioContext) return;
+
+            const secondsPerBeat = 60.0 / tempo;
+            const secondsPer16thNote = secondsPerBeat / 4;
+
+            // Calculate which step should be displayed based on elapsed time from start
+            const currentTime = audioContext.currentTime;
+            const elapsed = currentTime - startTime;
+
+            // Calculate current step based on time elapsed
+            const calculatedStep = Math.floor(elapsed / secondsPer16thNote) % STEPS;
+
+            // Only update visuals if step changed
+            if (calculatedStep !== visualStep) {
+                const prevStep = visualStep;
+                visualStep = calculatedStep;
+
+                // Remove playing class from previous step
+                instruments.forEach(inst => {
+                    const el = cachedStepElements[inst][prevStep];
+                    if (el) el.classList.remove('playing');
+                });
+
+                // Add playing class to current step
+                instruments.forEach(inst => {
+                    const el = cachedStepElements[inst][visualStep];
+                    if (el) el.classList.add('playing');
+                });
+
+                // Update piano playhead position (dynamically calculated)
+                const pianoPlayhead = document.getElementById('pianoPlayhead');
+                if (pianoPlayhead) {
+                    // Get any cell from this step column (use cached cells)
+                    const firstNote = Object.keys(cachedPianoCells)[0];
+                    if (firstNote && cachedPianoCells[firstNote][visualStep]) {
+                        const cell = cachedPianoCells[firstNote][visualStep];
+
+                        if (cell && pianoPlayhead.parentElement) {
+                            const parentRect = pianoPlayhead.parentElement.getBoundingClientRect();
+                            const cellRect = cell.getBoundingClientRect();
+
+                            // Calculate position relative to playhead's parent container
+                            const leftPosition = cellRect.left - parentRect.left;
+                            const cellWidth = cellRect.width;
+
+                            pianoPlayhead.style.left = `${leftPosition}px`;
+                            pianoPlayhead.style.width = `${cellWidth}px`;
+                        }
                     }
                 }
             }
 
-            currentStep = (currentStep + 1) % STEPS;
+            requestAnimationFrame(updateVisuals);
         }
 
-        // Transport controls
+        // Transport controls (audio-synced)
         function play() {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -1670,15 +1739,20 @@
 
             if (!isPlaying) {
                 isPlaying = true;
-                const tempo = parseInt(document.getElementById('tempoSlider').value);
-                const interval = (60 / tempo / 4) * 1000; // 16th notes
+                tempo = parseInt(document.getElementById('tempoSlider').value);
+
+                // Initialize timing
+                currentStep = 0;
+                visualStep = 0;
+                startTime = audioContext.currentTime; // Record start time
+                nextNoteTime = audioContext.currentTime + 0.005; // Start very soon
 
                 // Show piano playhead
                 const pianoPlayhead = document.getElementById('pianoPlayhead');
                 if (pianoPlayhead) {
                     pianoPlayhead.style.display = 'block';
                 }
-                
+
                 const playBtn = document.getElementById('playBtn');
                 playBtn.innerHTML = `
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1687,9 +1761,12 @@
                     </svg>
                     <span>Pause</span>
                 `;
-                
-                advanceSequencer();
-                intervalId = setInterval(advanceSequencer, interval);
+
+                // Start audio scheduler
+                timerID = setInterval(scheduler, lookaheadInterval);
+
+                // Start visual updates
+                requestAnimationFrame(updateVisuals);
             } else {
                 pause();
             }
@@ -1697,7 +1774,7 @@
 
         function pause() {
             isPlaying = false;
-            clearInterval(intervalId);
+            clearInterval(timerID);
 
             const playBtn = document.getElementById('playBtn');
             playBtn.innerHTML = `
@@ -1711,6 +1788,7 @@
         function stop() {
             pause();
             currentStep = 0;
+            visualStep = 0;
 
             // Remove playing class using cached elements (much faster)
             instruments.forEach(inst => {

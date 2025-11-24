@@ -40,7 +40,7 @@ export default async function handler(req, res) {
             });
         }
 
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         // Generate both drum and piano patterns in parallel
         const [drumResponse, pianoResponse] = await Promise.all([
@@ -84,9 +84,15 @@ Return ONLY the JSON, no other text.`
 
     } catch (error) {
         console.error('Error generating patterns:', error);
+        console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+        });
         res.status(500).json({
             error: 'Failed to generate patterns',
-            message: error.message
+            message: error.message,
+            details: error.toString()
         });
     }
 }
