@@ -4,13 +4,13 @@ AI-powered rhythm and melody generator with drum machine and piano roll interfac
 
 ## Setup
 
-Install dependencies:
+Install all dependencies:
 
 ```bash
-npm install
+npm run install:all
 ```
 
-Get a free Google Gemini API key at https://aistudio.google.com/app/apikey and add it to `.env`:
+Get a free Google Gemini API key at https://aistudio.google.com/app/apikey and add it to `.env` in the root directory:
 
 ```
 GEMINI_API_KEY=your-api-key-here
@@ -22,7 +22,22 @@ Run the application:
 npm run dev:all
 ```
 
-Access at http://localhost:5173
+This starts both frontend (http://localhost:5173) and backend (http://localhost:3001)
+
+## Project Structure
+
+```
+ai-midi-generator/
+├── frontend/          # Vite frontend application
+│   ├── index.html
+│   └── package.json
+├── backend/           # Express backend server
+│   ├── local.js       # Local development server
+│   ├── api/           # Vercel serverless functions
+│   ├── lib/           # Shared AI logic
+│   └── package.json
+└── .env              # API keys (not committed)
+```
 
 ## Features
 
