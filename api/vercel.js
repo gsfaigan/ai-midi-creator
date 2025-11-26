@@ -1,4 +1,4 @@
-import { generatePatterns } from '../lib/generatePatterns.js';
+import { generatePatterns } from '../backend/lib/generatePatterns.js';
 
 export default async function handler(req, res) {
     // Enable CORS
@@ -51,7 +51,8 @@ export default async function handler(req, res) {
         res.status(200).json({
             drumPattern,
             pianoPattern
-        });    } catch (error) {
+        });
+    } catch (error) {
         console.error('Error generating patterns:', error);
         console.error('Error details:', {
             name: error.name,
