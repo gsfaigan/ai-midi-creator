@@ -453,7 +453,7 @@
 
         .track {
             display: grid;
-            grid-template-columns: 80px repeat(16, 1fr);
+            grid-template-columns: 80px repeat(32, 1fr);
             gap: 4px;
             align-items: center;
             margin-bottom: 8px;
@@ -691,7 +691,7 @@
         .piano-grid {
             display: grid;
             grid-template-rows: repeat(12, 24px);
-            grid-template-columns: repeat(16, 1fr);
+            grid-template-columns: repeat(32, 1fr);
             gap: 0;
         }
 
@@ -733,64 +733,64 @@
             opacity: 0.9;
         }
 
-        /* Gradient from dark green (C/bottom) to light green (B/top) */
-        .piano-cell:nth-child(n+1):nth-child(-n+16).active,
-        .piano-cell:nth-child(n+1):nth-child(-n+16).active::before {
+        /* Gradient from dark green (C/bottom) to light green (B/top) - 32 steps per row */
+        .piano-cell:nth-child(n+1):nth-child(-n+32).active,
+        .piano-cell:nth-child(n+1):nth-child(-n+32).active::before {
             background: #008055; /* Darkest - C */
         }
 
-        .piano-cell:nth-child(n+17):nth-child(-n+32).active,
-        .piano-cell:nth-child(n+17):nth-child(-n+32).active::before {
+        .piano-cell:nth-child(n+33):nth-child(-n+64).active,
+        .piano-cell:nth-child(n+33):nth-child(-n+64).active::before {
             background: #00995f;
         }
 
-        .piano-cell:nth-child(n+33):nth-child(-n+48).active,
-        .piano-cell:nth-child(n+33):nth-child(-n+48).active::before {
+        .piano-cell:nth-child(n+65):nth-child(-n+96).active,
+        .piano-cell:nth-child(n+65):nth-child(-n+96).active::before {
             background: #00b36a;
         }
 
-        .piano-cell:nth-child(n+49):nth-child(-n+64).active,
-        .piano-cell:nth-child(n+49):nth-child(-n+64).active::before {
+        .piano-cell:nth-child(n+97):nth-child(-n+128).active,
+        .piano-cell:nth-child(n+97):nth-child(-n+128).active::before {
             background: #00cc75;
         }
 
-        .piano-cell:nth-child(n+65):nth-child(-n+80).active,
-        .piano-cell:nth-child(n+65):nth-child(-n+80).active::before {
+        .piano-cell:nth-child(n+129):nth-child(-n+160).active,
+        .piano-cell:nth-child(n+129):nth-child(-n+160).active::before {
             background: #00e680;
         }
 
-        .piano-cell:nth-child(n+81):nth-child(-n+96).active,
-        .piano-cell:nth-child(n+81):nth-child(-n+96).active::before {
+        .piano-cell:nth-child(n+161):nth-child(-n+192).active,
+        .piano-cell:nth-child(n+161):nth-child(-n+192).active::before {
             background: #00ff8b;
         }
 
-        .piano-cell:nth-child(n+97):nth-child(-n+112).active,
-        .piano-cell:nth-child(n+97):nth-child(-n+112).active::before {
+        .piano-cell:nth-child(n+193):nth-child(-n+224).active,
+        .piano-cell:nth-child(n+193):nth-child(-n+224).active::before {
             background: #1aff99;
         }
 
-        .piano-cell:nth-child(n+113):nth-child(-n+128).active,
-        .piano-cell:nth-child(n+113):nth-child(-n+128).active::before {
+        .piano-cell:nth-child(n+225):nth-child(-n+256).active,
+        .piano-cell:nth-child(n+225):nth-child(-n+256).active::before {
             background: #33ffa6;
         }
 
-        .piano-cell:nth-child(n+129):nth-child(-n+144).active,
-        .piano-cell:nth-child(n+129):nth-child(-n+144).active::before {
+        .piano-cell:nth-child(n+257):nth-child(-n+288).active,
+        .piano-cell:nth-child(n+257):nth-child(-n+288).active::before {
             background: #4dffb3;
         }
 
-        .piano-cell:nth-child(n+145):nth-child(-n+160).active,
-        .piano-cell:nth-child(n+145):nth-child(-n+160).active::before {
+        .piano-cell:nth-child(n+289):nth-child(-n+320).active,
+        .piano-cell:nth-child(n+289):nth-child(-n+320).active::before {
             background: #66ffc0;
         }
 
-        .piano-cell:nth-child(n+161):nth-child(-n+176).active,
-        .piano-cell:nth-child(n+161):nth-child(-n+176).active::before {
+        .piano-cell:nth-child(n+321):nth-child(-n+352).active,
+        .piano-cell:nth-child(n+321):nth-child(-n+352).active::before {
             background: #80ffcc;
         }
 
-        .piano-cell:nth-child(n+177):nth-child(-n+192).active,
-        .piano-cell:nth-child(n+177):nth-child(-n+192).active::before {
+        .piano-cell:nth-child(n+353):nth-child(-n+384).active,
+        .piano-cell:nth-child(n+353):nth-child(-n+384).active::before {
             background: #99ffd9; /* Lightest - B */
         }
 
@@ -968,7 +968,7 @@
             }
 
             .track {
-                grid-template-columns: 60px repeat(16, 1fr);
+                grid-template-columns: 60px repeat(32, 1fr);
             }
 
             .step:nth-child(4n+2) {
@@ -1159,7 +1159,7 @@
     <script>
 
         // Configuration
-        const STEPS = 16;
+        const STEPS = 32;
         const instruments = ['kick', 'snare', 'hihat', 'openhat', 'clap'];
         
         // Piano roll configuration
@@ -1175,39 +1175,39 @@
         // Preset patterns
         const presets = {
             techno: {
-                kick:    [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
-                snare:   [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
-                hihat:   [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
-                openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                clap:    [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]
+                kick:    [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
+                snare:   [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                hihat:   [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+                openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                clap:    [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]
             },
             house: {
-                kick:    [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
-                snare:   [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
-                hihat:   [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
-                openhat: [0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
-                clap:    [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]
+                kick:    [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
+                snare:   [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                hihat:   [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+                openhat: [0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
+                clap:    [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]
             },
             trap: {
-                kick:    [1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0],
-                snare:   [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
-                hihat:   [1,0,1,0,1,0,1,0,1,1,0,1,0,1,1,1],
-                openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],
-                clap:    [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]
+                kick:    [1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0],
+                snare:   [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+                hihat:   [1,0,1,0,1,0,1,0,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,0,1,1,0,1,0,1,1,1],
+                openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],
+                clap:    [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]
             },
             breakbeat: {
-                kick:    [1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],
-                snare:   [0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0],
-                hihat:   [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
-                openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],
-                clap:    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                kick:    [1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],
+                snare:   [0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0],
+                hihat:   [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+                openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],
+                clap:    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             },
             minimal: {
-                kick:    [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0],
-                snare:   [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
-                hihat:   [0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
-                openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                clap:    [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]
+                kick:    [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0],
+                snare:   [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+                hihat:   [0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+                openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                clap:    [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]
             }
         };
 
