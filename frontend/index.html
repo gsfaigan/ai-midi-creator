@@ -996,6 +996,7 @@
                     autocomplete="off"
                 />
                 <button class="btn primary" id="generateBtn">AI Generate</button>
+                <button class="btn primary" id="generateCreativeBtn">Extra Creative</button>
             </div>
 
             <div class="idea-buttons">
@@ -1841,32 +1842,38 @@
         }
 
         // AI beat generation
-        async function generateBeat() {
+        async function generateBeat(isCreative = false) {
+            console.log('Frontend generateBeat called with isCreative:', isCreative);
+
             const input = document.getElementById('beatInput').value;
             if (!input.trim()) {
                 showStatus('Please describe the beat you want', 'error');
                 return;
             }
 
-            const btn = document.getElementById('generateBtn');
+            const btn = isCreative ? document.getElementById('generateCreativeBtn') : document.getElementById('generateBtn');
             const loadingOverlay = document.getElementById('loadingOverlay');
 
             btn.disabled = true;
             btn.textContent = 'Generating...';
             loadingOverlay.classList.add('show');
-            
+
             try {
+                const requestBody = {
+                    input: input,
+                    currentOctave: currentOctave,
+                    notes: notes,
+                    isCreative: isCreative
+                };
+                console.log('Frontend sending request:', requestBody);
+
                 // Call backend API to generate patterns
                 const response = await fetch("/api/generate", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({
-                        input: input,
-                        currentOctave: currentOctave,
-                        notes: notes
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 if (!response.ok) {
@@ -1935,7 +1942,7 @@
             } finally {
                 loadingOverlay.classList.remove('show');
                 btn.disabled = false;
-                btn.textContent = 'AI Generate';
+                btn.textContent = isCreative ? 'Extra Creative' : 'AI Generate';
             }
         }
 
@@ -2270,7 +2277,8 @@
         document.getElementById('clearBtn').addEventListener('click', clear);
         document.getElementById('clearDrumsBtn').addEventListener('click', clearDrums);
         document.getElementById('clearPianoBtn').addEventListener('click', clearPiano);
-        document.getElementById('generateBtn').addEventListener('click', generateBeat);
+        document.getElementById('generateBtn').addEventListener('click', () => generateBeat(false));
+        document.getElementById('generateCreativeBtn').addEventListener('click', () => generateBeat(true));
         document.getElementById('exportBtn').addEventListener('click', showExportModal);
         document.getElementById('exportTxtBtn').addEventListener('click', () => {
             const filename = document.getElementById('exportFilename').value.trim() || 'mybeat';

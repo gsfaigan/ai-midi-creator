@@ -1,0 +1,15 @@
+{
+  "name": "ai-midi-generator-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node local.js",
+    "dev": "node local.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2"
+  }
+}
