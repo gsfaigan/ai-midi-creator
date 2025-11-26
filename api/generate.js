@@ -1,4 +1,4 @@
-import { generatePatterns } from '../backend/lib/generatePatterns.js';
+import { generatePatterns } from './lib/generatePatterns.js';
 
 export default async function handler(req, res) {
     // Enable CORS
