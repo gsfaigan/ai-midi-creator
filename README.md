@@ -1,4 +1,4 @@
-# AI MIDI Generator
+# Lil Beat Generator
 
 AI-powered rhythm and melody generator with drum machine and piano roll interface.
 
@@ -36,7 +36,7 @@ ai-midi-generator/
 │   ├── api/           # Vercel serverless functions
 │   ├── lib/           # Shared AI logic
 │   └── package.json
-└── .env              # API keys (not committed)
+└── .env              # Your API key
 ```
 
 ## Features
@@ -47,7 +47,3 @@ ai-midi-generator/
 - Tempo control (60-180 BPM)
 - Play, pause, stop, clear, and random pattern generation
 - Export to txt (for opening in the site later) and export to MIDI (for opening in a DAW)
-
-## Security
-
-Never commit your `.env` file.
