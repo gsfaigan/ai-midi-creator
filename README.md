@@ -1,5 +1,13 @@
 # Lil Beat Generator
 
+
+![Vite](https://img.shields.io/badge/Vite-5.0.0-blueviolet?logo=vite)
+![Express](https://img.shields.io/badge/Express.js-4.21.2-lightgrey?logo=express)
+![Google Gemini API](https://img.shields.io/badge/Google%20Gemini%20API-%40google%2Fgenerative--ai-yellow?logo=google)
+![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-green?logo=node.js)
+![JavaScript](https://img.shields.io/badge/JavaScript-ESM-F7DF1E?logo=javascript)
+![HTML5](https://img.shields.io/badge/HTML5-%3E%3D5-E34F26?logo=html5)
+
 AI-powered rhythm and melody generator with drum machine and piano roll interface.
 
 ## Setup
