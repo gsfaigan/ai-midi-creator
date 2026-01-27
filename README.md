@@ -49,9 +49,8 @@ ai-midi-generator/
 
 ## Features
 
-- 16-step drum sequencer with 5 drum sounds
-- Piano roll with multiple octaves
+- 32-step sequencer
 - AI-powered generation
-- Tempo control (60-180 BPM)
-- Play, pause, stop, clear, and random pattern generation
+- Tempo control
+- Play, pause, stop, clear
 - Export to txt (for opening in the site later) and export to MIDI (for opening in a DAW)
