@@ -34,17 +34,25 @@ This starts both frontend (http://localhost:5173) and backend (http://localhost:
 
 ## Project Structure
 
+
 ```
-ai-midi-generator/
-├── frontend/          # Vite frontend application
-│   ├── index.html
-│   └── package.json
-├── backend/           # Express backend server
-│   ├── local.js       # Local development server
-│   ├── api/           # Vercel serverless functions
-│   ├── lib/           # Shared AI logic
-│   └── package.json
-└── .env              # Your API key
+ai-midi-creator/
+├── api/             # Vercel serverless functions (API endpoints)
+│   ├── generate.js  # Main API handler for pattern generation
+│   └── lib/         # Shared API logic
+│       └── ...
+├── backend/         # Express backend server (local/dev)
+│   ├── local.js     # Entry point for backend server
+│   ├── lib/         # Shared backend logic
+│   │   └── ...
+│   └── ...
+├── frontend/        # Vite frontend app
+│   ├── index.html   # Main content file
+│   ├── vite.config.js # Vite config
+│   └── ...
+├── package.json     # Root scripts and shared dependencies
+├── README.md
+└── ...
 ```
 
 ## Features
