@@ -1,7 +1,7 @@
 {
   "name": "ai-midi-generator",
   "version": "1.0.0",
-  "description": "AI MIDI Generator - Rhythm Machine",
+  "description": "AI MIDI Generator",
   "type": "module",
   "scripts": {
     "dev": "npm run dev --prefix frontend",
